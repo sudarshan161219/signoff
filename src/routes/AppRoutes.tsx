@@ -7,7 +7,6 @@ import { AppLayout } from "@/layouts/AppLayout";
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Page (Full screen, no sidebar) */}
       <Route path="/" element={<Landing />} />
 
       {/* App Layout Pages */}
