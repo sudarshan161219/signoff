@@ -56,13 +56,13 @@ export const Landing = () => {
           SignOff
         </div>
 
-        <a
+        {/* <a
           href="https://github.com/yourusername"
           target="_blank"
           className={styles.navLink}
         >
           GitHub
-        </a>
+        </a> */}
       </nav>
 
       {/* HERO */}
