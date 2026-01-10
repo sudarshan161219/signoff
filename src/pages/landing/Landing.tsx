@@ -11,6 +11,8 @@ import {
   MousePointer2,
   Loader2,
   CheckCircle2,
+  Twitter,
+  Coffee,
 } from "lucide-react";
 
 export const Landing = () => {
@@ -56,13 +58,32 @@ export const Landing = () => {
           SignOff
         </div>
 
-        {/* <a
-          href="https://github.com/yourusername"
-          target="_blank"
-          className={styles.navLink}
-        >
-          GitHub
-        </a> */}
+        {/* RIGHT: Social Links */}
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <a
+            href="https://x.com/buildwithSud"
+            target="_blank"
+            rel="noreferrer"
+            title="Follow updates on X"
+            className={styles.navLink} // Ensure this class handles hover states
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+          >
+            <Twitter size={16} />
+            <span style={{ fontSize: "0.875rem" }}>Updates</span>
+          </a>
+
+          <a
+            href="https://buymeacoffee.com/sudarshanhosalli"
+            target="_blank"
+            rel="noreferrer"
+            title="Support the project"
+            className={styles.navLink}
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+          >
+            <Coffee size={16} />
+            <span style={{ fontSize: "0.875rem" }}>Support</span>
+          </a>
+        </div>
       </nav>
 
       {/* HERO */}
@@ -78,7 +99,7 @@ export const Landing = () => {
         </h1>
 
         <p className={styles.subtitle}>
-          Share a secure approval link. No sign-up.
+          Share a secure approval link. No sign-up required.
         </p>
 
         <form onSubmit={handleStart} className={styles.form}>
@@ -137,7 +158,35 @@ export const Landing = () => {
 
       {/* FOOTER */}
       <footer className={styles.footer}>
-        © {new Date().getFullYear()} SignOff. Built for Freelancers.
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+            alignItems: "center",
+          }}
+        >
+          <span>
+            © {new Date().getFullYear()} SignOff. Built for Freelancers.
+          </span>
+
+          {/* Subtle footer links */}
+          <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.5rem" }}>
+            <a
+              href="https://x.com/buildwithSud"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                opacity: 0.6,
+                fontSize: "0.8rem",
+                color: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              Built by Sudarshan
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );
