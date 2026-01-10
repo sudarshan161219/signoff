@@ -2,9 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { UploadCloud, Loader2, FileText, X } from "lucide-react";
 import styles from "./index.module.css";
-import { useProjectStore } from "@/store/projectStore/useProjectStore";
+import { useUploadDeliverable } from "@/hooks/useProject/export";
 
 const STORAGE_KEY = "signoff_upload_draft_file";
+
+interface FileUploaderProps {
+  token?: string;
+}
 
 // --- Helper: Convert File to Base64 ---
 const fileToBase64 = (file: File): Promise<string> => {
@@ -32,13 +36,13 @@ const base64ToFile = (
   return new File([u8arr], fileName, { type: mimeType });
 };
 
-export const FileUploader = () => {
-  const { uploadDeliverable, isUploading, uploadProgress } = useProjectStore();
+export const FileUploader = ({ token }: FileUploaderProps) => {
+  const { uploadDeliverable, isUploading, uploadProgress } =
+    useUploadDeliverable(token);
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isHydrating, setIsHydrating] = useState(true); // Prevent overwriting before load
-
+  const [isHydrating, setIsHydrating] = useState(true);
   // 1. Load from LocalStorage on Mount
   useEffect(() => {
     const loadDraft = async () => {
@@ -110,14 +114,23 @@ export const FileUploader = () => {
   }, []);
 
   const startUpload = async () => {
-    if (file) {
-      console.log(file);
-      await uploadDeliverable(file);
-      // Optional: Clear storage on successful upload?
-      // reset();
+    // We don't need to pass 'token' here anymore, the hook has it.
+    if (file && token) {
+      try {
+        console.log("Uploading:", file.name);
+
+        // 1. Wait for upload to finish
+        await uploadDeliverable(file);
+
+        // 2. Success! Clear the draft from UI and LocalStorage
+        reset();
+      } catch (err) {
+        // 3. Error is handled in the hook (toast), but we catch here
+        // to prevent 'reset()' from running so the user doesn't lose their file.
+        console.log("Upload prevented reset due to error", err);
+      }
     }
   };
-
   const reset = () => {
     setFile(null);
     setPreviewUrl(null);

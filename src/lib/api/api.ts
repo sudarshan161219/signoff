@@ -2,13 +2,9 @@ import axios from "axios";
 
 // Create the Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
 });
 
-// -----------------------------------------------------------------------------
-// REQUEST INTERCEPTOR
-// This function runs BEFORE every request leaves your browser.
-// -----------------------------------------------------------------------------
 api.interceptors.request.use(
   (config) => {
     // 1. Try to get the token from browser storage

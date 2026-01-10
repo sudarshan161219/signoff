@@ -1,24 +1,27 @@
-import { AlertTriangle, X, Loader2 } from "lucide-react";
-import { useModalStore } from "@/store/modalStore/useModalStore"; // Import Store
 import { useState } from "react";
+import { AlertTriangle, X, Loader2 } from "lucide-react";
+import { useModalStore } from "@/store/modalStore/useModalStore";
 
 export const WarningModal = () => {
-  // 1. READ FROM STORE
   const { isOpen, type, data, closeModal } = useModalStore();
+
+  // 1. Add local loading state
   const [isLoading, setIsLoading] = useState(false);
 
-  // If closed or wrong type, don't render
   if (!isOpen || type !== "WARNING" || !data) return null;
 
   const handleConfirm = async () => {
+    // 2. Check if a confirm function was passed
+    if (!data.onConfirm) return;
+
     try {
       setIsLoading(true);
-      await data.onConfirm(); // <--- Run the stored function
-      // We assume the parent will handle navigation/closing,
-      // but usually we close on success:
-      // closeModal();
-    } catch (error) {
-      console.error(error);
+      // 3. Await the function passed from the parent component
+      await data.onConfirm();
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      // Error handling is usually done in the hook, but we catch here to stop the spinner if needed
     } finally {
       setIsLoading(false);
     }
@@ -41,6 +44,7 @@ export const WarningModal = () => {
           </div>
 
           <h3 className="text-xl font-bold text-white">{data.title}</h3>
+
           <p className="text-sm text-zinc-400 leading-relaxed px-2">
             {data.description}
           </p>
@@ -53,6 +57,7 @@ export const WarningModal = () => {
             >
               Cancel
             </button>
+
             <button
               onClick={handleConfirm}
               disabled={isLoading}

@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useProjectStore } from "@/store/projectStore/useProjectStore";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { FileUploader } from "@/components/dashboard/FileUploader";
+import { SocketManager } from "@/components/socketManager/SocketManager";
+import { useModalStore } from "@/store/modalStore/useModalStore";
+import {
+  useAdminProject,
+  useUpdateExpiration,
+  useDeleteFile,
+} from "@/hooks/useProject/export";
 
 import {
   Copy,
@@ -11,57 +17,75 @@ import {
   FileIcon,
   Clock,
   CalendarDays,
+  Trash2,
 } from "lucide-react";
-import { useProjectPolling } from "@/hooks/useProjectPolling";
 
 export const Dashboard = () => {
-  const { token } = useParams<{ token: string }>();
+  const { token } = useParams();
   const navigate = useNavigate();
+
+  // 1. DATA FETCHING (Replaces fetchProject from store)
+  const { data: project, isLoading, error } = useAdminProject(token);
+
+  // 2. MUTATIONS
+  const { mutate: updateExpiration } = useUpdateExpiration(token);
+  const { mutate: deleteFile } = useDeleteFile(token);
+  const { openModal } = useModalStore();
+  // 3. LOCAL UI STATE
   const [copyText, setCopyText] = useState("Copy Link");
+  // Initialize duration from local storage or default to 30
   const [selectedDuration, setSelectedDuration] = useState(() => {
     if (!token) return "30";
     return localStorage.getItem(`signoff_duration_${token}`) || "30";
   });
 
-  const { project, isLoading, error, fetchProject, updateExpiration } =
-    useProjectStore();
-
-  useProjectPolling(15000);
-
+  // Redirect on specific error (optional)
   useEffect(() => {
-    if (token) {
-      fetchProject(token).catch(() => navigate("/"));
+    if (error) {
+      console.error("Dashboard Load Error:", error);
     }
-  }, [token, fetchProject, navigate]);
+  }, [error, navigate]);
 
-  // --- REMOVED THE USEEFFECT THAT SYNCED FROM BACKEND ---
-  // We now rely purely on the Admin's LocalStorage and manual changes.
+  // --- HANDLERS ---
 
   const handleCopyLink = () => {
     if (!project) return;
-    const url = `${window.location.origin}/view/${project.publicToken}`;
+    // Fallback if publicToken isn't in the response yet
+    const linkToken = project.publicToken || token;
+    const url = `${window.location.origin}/view/${linkToken}`;
+
     navigator.clipboard.writeText(url);
     setCopyText("Copied!");
     setTimeout(() => setCopyText("Copy Link"), 2000);
   };
 
-  const handleDurationChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleDeleteClick = (fileId: string, projectId: string) => {
+    openModal("WARNING", {
+      title: "Delete File?",
+      description:
+        "This will permanently delete the file from both your dashboard and the client's view. The client will lose access immediately.",
+      confirmText: "Delete File",
+      variant: "danger",
+      onConfirm: async () => {
+        deleteFile({ fileId, projectId });
+        // closeModal();
+      },
+    });
+  };
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     const days = Number(val);
 
-    // 2. UPDATE UI & LOCAL STORAGE IMMEDIATELY
+    // 1. Optimistic UI update
     setSelectedDuration(val);
-    if (token) {
-      localStorage.setItem(`signoff_duration_${token}`, val);
-    }
+    if (token) localStorage.setItem(`signoff_duration_${token}`, val);
 
-    // 3. Update Backend in Background
-    if (updateExpiration) {
-      await updateExpiration(days);
-    }
+    // 2. Server Update (Mutation)
+    updateExpiration(days);
   };
+
+  // --- RENDER STATES ---
 
   if (isLoading)
     return (
@@ -69,15 +93,18 @@ export const Dashboard = () => {
         <Loader2 className="animate-spin text-indigo-500" />
       </div>
     );
+
   if (error || !project)
     return (
       <div className="h-screen flex items-center justify-center bg-black text-red-400">
-        {error || "Project not found"}
+        Error loading project. Please refresh.
       </div>
     );
 
   return (
     <div className="min-h-screen bg-black text-gray-100 p-6">
+      <SocketManager />
+
       <div className="max-w-5xl mx-auto space-y-8">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -88,7 +115,7 @@ export const Dashboard = () => {
             <div className="flex items-center gap-3">
               <StatusBadge status={project.status} />
               <span className="text-zinc-500 text-sm font-mono">
-                ID: {project.id.slice(0, 8)}...
+                ID: {project.id ? project.id.slice(0, 8) : "..."}
               </span>
             </div>
           </div>
@@ -116,7 +143,21 @@ export const Dashboard = () => {
           {/* LEFT: UPLOAD AREA */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="text-lg font-semibold mb-6">Deliverable</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold ">Deliverable</h2>
+                {project.file && (
+                  <button
+                    onClick={() =>
+                      handleDeleteClick(project.file?.id, project.id)
+                    }
+                    title="Delete Project"
+                    className="p-2 cursor-pointer text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
+              </div>
+
               {project.file ? (
                 <div className="flex items-center justify-between p-4 bg-zinc-900 border border-zinc-800 rounded-xl group">
                   <div className="flex items-center gap-4 overflow-hidden">
@@ -132,7 +173,8 @@ export const Dashboard = () => {
                   </div>
                 </div>
               ) : (
-                <FileUploader />
+                /* Ensure FileUploader uses useUploadDeliverable internally or props */
+                <FileUploader token={token} />
               )}
             </div>
 
@@ -142,7 +184,7 @@ export const Dashboard = () => {
                   Client Feedback
                 </h3>
                 <p className="text-red-200/80 italic">
-                  "{project.latestComment}"
+                  {project.latestComment}
                 </p>
               </div>
             )}
