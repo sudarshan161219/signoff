@@ -15,8 +15,14 @@ interface ExpirationPayload {
   expiresAt: string;
 }
 
-export const ClientSocketManager = () => {
-  const { token } = useParams(); // Public token from URL
+interface ClientSocketManagerProps {
+  projectId: string;
+}
+
+export const ClientSocketManager = ({
+  projectId,
+}: ClientSocketManagerProps) => {
+  const { token } = useParams();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -26,8 +32,8 @@ export const ClientSocketManager = () => {
 
     // 1. Connection & Join Logic
     const handleJoin = () => {
-      console.log(`🔌 Client Connected! Joining room: ${token}`);
-      socket.emit("join-project", { token });
+      console.log(`🔌 Client Connected! Joining room: ${projectId}`);
+      socket.emit("join-project", { projectId });
     };
 
     if (!socket.connected) {
@@ -92,7 +98,7 @@ export const ClientSocketManager = () => {
       socket.off("file-uploaded", handleFileRefresh);
       socket.off("file-deleted", handleFileRefresh);
     };
-  }, [token, queryClient]);
+  }, [token, queryClient, projectId]);
 
   return null;
 };

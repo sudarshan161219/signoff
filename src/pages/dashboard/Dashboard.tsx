@@ -103,7 +103,7 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-black text-gray-100 p-6">
-      <SocketManager />
+      <SocketManager projectId={project.id} />
 
       <div className="max-w-5xl mx-auto space-y-8">
         {/* HEADER */}

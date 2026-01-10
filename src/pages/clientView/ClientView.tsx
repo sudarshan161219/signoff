@@ -51,7 +51,7 @@ export const ClientView = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pb-24 font-sans">
-      <ClientSocketManager />
+      <ClientSocketManager projectId={project.id} />
       {/* Top Bar */}
       <div className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">

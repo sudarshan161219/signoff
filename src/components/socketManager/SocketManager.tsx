@@ -7,8 +7,11 @@ import { PROJECT_KEYS } from "@/hooks/useProject/project.keys";
 interface ExpirationPayload {
   expiresAt: string;
 }
+interface SocketManagerProps {
+  projectId: string;
+}
 
-export const SocketManager = () => {
+export const SocketManager = ({ projectId }: SocketManagerProps) => {
   const { token } = useParams();
   const queryClient = useQueryClient();
 
@@ -21,8 +24,8 @@ export const SocketManager = () => {
 
     // 1. Connection & Join Logic
     const handleJoin = () => {
-      console.log(`🔌 Connected! Joining room: ${token}`);
-      socket.emit("join-project", { token });
+      console.log(`🔌 Connected! Joining room: ${projectId}`);
+      socket.emit("join-project", { projectId });
     };
 
     if (!socket.connected) {
@@ -74,7 +77,7 @@ export const SocketManager = () => {
       socket.off("file-uploaded", handleFileUpdate);
       socket.off("file-deleted", handleFileUpdate);
     };
-  }, [token, queryClient]);
+  }, [token, queryClient, projectId]);
 
   return null;
 };
