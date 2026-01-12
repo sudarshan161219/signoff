@@ -13,6 +13,9 @@ import {
   CheckCircle2,
   Twitter,
   Coffee,
+  UploadCloud,
+  ThumbsUp,
+  Send,
 } from "lucide-react";
 
 export const Landing = () => {
@@ -94,12 +97,13 @@ export const Landing = () => {
         </div>
 
         <h1 className={styles.title}>
-          Client approvals, <br />
-          <span className={styles.gradientText}>without follow-ups.</span>
+          The friction-free way to <br />
+          <span className={styles.gradientText}>get client approvals.</span>
         </h1>
 
         <p className={styles.subtitle}>
-          Share a secure approval link. No sign-up required.
+          Stop chasing emails. Create a secure workspace in seconds, upload your
+          work, and get a "Yes" or "No". No sign-ups required.
         </p>
 
         <form onSubmit={handleStart} className={styles.form}>
@@ -134,6 +138,40 @@ export const Landing = () => {
           </p>
         </form>
       </main>
+
+      {/* HOW IT WORKS (Crucial for explaining the product workflow) */}
+      <section className={styles.stepsSection}>
+        <h2 className={styles.sectionTitle}>How it works</h2>
+        <div className={styles.stepsGrid}>
+          <div className={styles.stepCard}>
+            <div className={styles.stepIcon}>
+              <UploadCloud />
+            </div>
+            <h3>1. Upload</h3>
+            <p>Create a temporary workspace and drag-and-drop your assets.</p>
+          </div>
+          <div className={styles.stepArrow}>
+            <ArrowRight />
+          </div>
+          <div className={styles.stepCard}>
+            <div className={styles.stepIcon}>
+              <Send />
+            </div>
+            <h3>2. Share</h3>
+            <p>Send the unique secure link to your client. No login needed.</p>
+          </div>
+          <div className={styles.stepArrow}>
+            <ArrowRight />
+          </div>
+          <div className={styles.stepCard}>
+            <div className={styles.stepIcon}>
+              <ThumbsUp />
+            </div>
+            <h3>3. Approve</h3>
+            <p>Clients view files and hit "Approve" or request changes.</p>
+          </div>
+        </div>
+      </section>
 
       {/* FEATURES */}
       <section className={styles.features}>
